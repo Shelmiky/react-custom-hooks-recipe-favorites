@@ -1,16 +1,25 @@
 import { useMemo, useState } from 'react';
+import { RecipeForm } from './components/RecipeForm';
 import { RecipeList } from './components/RecipeList';
 import { recipes } from './data/recipes';
 import { useFavorites } from './hooks/useFavorites';
 
 export function App() {
+  const [allRecipes, setAllRecipes] = useState(recipes);
   const [showFavorites, setShowFavorites] = useState(false);
   const { favoriteIds, isFavorite, toggleFavorite } = useFavorites();
 
   const visibleRecipes = useMemo(
-    () => (showFavorites ? recipes.filter((recipe) => favoriteIds.includes(recipe.id)) : recipes),
-    [favoriteIds, showFavorites]
+    () => (showFavorites ? allRecipes.filter((recipe) => favoriteIds.includes(recipe.id)) : allRecipes),
+    [allRecipes, favoriteIds, showFavorites]
   );
+
+  const addRecipe = (recipe) => {
+    setAllRecipes((currentRecipes) => [
+      ...currentRecipes,
+      { ...recipe, id: Math.max(0, ...currentRecipes.map(({ id }) => id)) + 1 },
+    ]);
+  };
 
   return (
     <main className="page-shell">
@@ -26,6 +35,8 @@ export function App() {
           <span>избранных</span>
         </div>
       </header>
+
+      <RecipeForm onAddRecipe={addRecipe} />
 
       <nav className="view-switcher" aria-label="Фильтр рецептов">
         <button
